@@ -1,0 +1,41 @@
+name: day19-clickout-smoke
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke:
+    name: smoke (clickout)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Start
+        run: |
+          npm run start -- -p 3000 > /tmp/next.log 2>&1 &
+
+      - name: Wait for server
+        run: npx wait-on http://127.0.0.1:3000
+
+      - name: Day19 clickout smoke
+        run: node tools/smoke/smoke-day19-clickout.mjs
+        env:
+          BASE_URL: http://127.0.0.1:3000
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          CI_TEST_EMAIL: ${{ secrets.CI_TEST_EMAIL }}
+          CI_TEST_PASSWORD: ${{ secrets.CI_TEST_PASSWORD }}
+          TEST_GAME_ID: ${{ secrets.TEST_GAME_ID }}
+          TEST_SLUG: ${{ secrets.TEST_SLUG }}
+          CLICKOUT_ALLOW_HOST: ${{ secrets.CLICKOUT_ALLOW_HOST }}
