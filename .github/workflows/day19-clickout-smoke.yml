@@ -8,6 +8,14 @@ jobs:
   smoke:
     name: smoke (clickout)
     runs-on: ubuntu-latest
+    env:
+      # Next build/runtime expects NEXT_PUBLIC_* vars
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      # Optional, but helps if server code reads non-public names too
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v4
 
