@@ -33,6 +33,9 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Verify service role secret present
+        run: node -e "if(!process.env.SUPABASE_SERVICE_ROLE_KEY){console.error('missing SUPABASE_SERVICE_ROLE_KEY');process.exit(1)}"
+
       - name: Build
         run: npm run build
 
