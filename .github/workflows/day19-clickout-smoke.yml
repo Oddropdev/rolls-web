@@ -4,18 +4,25 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   smoke:
     name: smoke (clickout)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     env:
       # Next build/runtime expects NEXT_PUBLIC_* vars
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
-      # Optional, but helps if server code reads non-public names too
+      # Server-side (do NOT expose as NEXT_PUBLIC)
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -40,10 +47,14 @@ jobs:
         run: node tools/smoke/smoke-day19-clickout.mjs
         env:
           BASE_URL: http://127.0.0.1:3000
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           CI_TEST_EMAIL: ${{ secrets.CI_TEST_EMAIL }}
           CI_TEST_PASSWORD: ${{ secrets.CI_TEST_PASSWORD }}
           TEST_GAME_ID: ${{ secrets.TEST_GAME_ID }}
           TEST_SLUG: ${{ secrets.TEST_SLUG }}
           CLICKOUT_ALLOW_HOST: ${{ secrets.CLICKOUT_ALLOW_HOST }}
+
+      - name: Dump Next log on failure
+        if: failure()
+        run: |
+          echo "---- /tmp/next.log (tail) ----"
+          tail -n 200 /tmp/next.log || true
