@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   smoke:
-    name: smoke (clickout)
+    name: rolls-web: smoke (clickout)
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
